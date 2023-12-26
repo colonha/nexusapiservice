@@ -1,0 +1,31 @@
+#docker-compose.yaml for run app and mysqldb
+
+version: '3.1'
+services:
+  # web:
+  #   restart: on-failure
+  #   build: .
+  #   ports:
+  #     - "5000:5000"
+  #   depends_on:
+  #     - db
+  #   environment:
+  #     - FLASK_ENV=development
+  #     - SQLALCHEMY_DATABASE_URI=mysql+pymysql://root:password@db/mydatabase
+# please replace mysql with mongodb
+# add mongo db
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - ../data/db:/data/db
+  init-db:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Dockerfile.init
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/mydatabase
