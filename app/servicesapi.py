@@ -2,12 +2,35 @@ from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from bson import ObjectId
 from datetime import datetime
+import os
 
 
 app = Flask(__name__)
 # Configure the SQLAlchemy part of the app instance
-app.config["MONGO_URI"] = "mongodb://localhost:27017/myDatabase"
+app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://mongo:27017/myDatabase")
 mongo = PyMongo(app)
+
+
+def is_db_ready():
+    try:
+        # Attempt a simple operation like a server info command to check DB connection
+        mongo.db.command('ismaster')
+        return True
+    except Exception as e:
+        print(f"Database check failed: {e}")
+        return False
+
+def wait_for_db(max_retries=5, delay=3):
+    retries = 0
+    while retries < max_retries:
+        if is_db_ready():
+            print("Database is ready.")
+            return True
+        else:
+            print(f"Waiting for database... retry {retries + 1}/{max_retries}")
+            time.sleep(delay)
+            retries += 1
+    raise Exception("Database is not ready after maximum retries.")
 
 # services and versions documents structure
 # {
@@ -41,7 +64,6 @@ class Service:
 
     @staticmethod
     def get_by_id(service_id):
-        print (type(service_id))
         try:
             service = mongo.db.services.find_one({"_id": ObjectId(service_id)})
             if service:
@@ -67,6 +89,11 @@ class Version:
         return mongo.db.versions.find({'service_id': service_id})
     
 
+@app.route('/')
+def index():
+    if not wait_for_db():
+        return "Database is not ready", 503
+    return "Hello, World!"
 
 @app.route('/api/service', methods=['POST'])
 def add_service():
@@ -102,5 +129,6 @@ def get_services():
 
 
 if __name__ == "__main__":
+    wait_for_db()
     app.run(debug=True)
 
