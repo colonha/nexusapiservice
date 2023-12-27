@@ -10,6 +10,9 @@ import logging
 pagination_data = reqparse.RequestParser()
 pagination_data.add_argument('page', type=int, required=True, help='Page number is required', location='args')
 pagination_data.add_argument('limit', type=int, required=True, help='Limit is required', location='args')
+filter_parser = reqparse.RequestParser()
+filter_parser.add_argument('name', type=str, required=False, help='Filter by service name', location='args')
+
 
 
 app = Flask(__name__)
@@ -131,7 +134,18 @@ def get_service(service_id):
 
 @app.route('/api/services', methods=['GET'])
 def get_services():
-    
+
+    args = filter_parser.parse_args()
+    filters = {}
+
+    if args['name']:
+        filters['name'] = args['name']
+        services = mongo.db.services.find(filters)
+        services_list = [{k: str(v) if isinstance(v, ObjectId) else v for k, v in service.items()} for service in services]
+        return jsonify({"services": [service for service in services_list]})
+
+    # Add other filters to the dictionary as needed
+
     args = pagination_data.parse_args()
     page = args['page']
     #page = 2
