@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'nexusapiservice'
+    static_configs:
+      - targets: ['web:5000']
+        # Replace 'host.docker.internal:5000' with your application's metrics endpoint
