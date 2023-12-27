@@ -14,7 +14,7 @@ RUN pip install -r requirements.txt
 EXPOSE 5000
 
 # Define environment variable
-ENV FLASK_APP=servicesapi.py
+ENV FLASK_APP=run.py
 
 # Run app.py when the container launches
 #CMD ["flask", "run", "--host=0.0.0.0"]

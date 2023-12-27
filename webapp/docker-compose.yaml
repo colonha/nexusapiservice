@@ -25,7 +25,7 @@ services:
 # init-db
   init-db:
     restart: on-failure
-    command: ["python", "init_db.py"]
+    command: ["python", "app/init_db.py"]
     build: .
     image: colonha/nexusapiservice
     depends_on:
