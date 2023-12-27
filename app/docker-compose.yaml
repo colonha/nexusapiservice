@@ -15,16 +15,18 @@ services:
 # please replace mysql with mongodb
 # add mongo db
   mongo:
-    image: mongo:latest
+    image: mongo:latest    
     ports:
       - "27017:27017"
     volumes:
       - ../../data/db:/data/db
   init-db:
     restart: on-failure
+    command: ["python", "init_db.py"]
     build:
       context: .
-      dockerfile: Dockerfile.init
+      dockerfile: Dockerfile
+    image: colonha/nexusapiservice
     depends_on:
       - mongo
     environment:

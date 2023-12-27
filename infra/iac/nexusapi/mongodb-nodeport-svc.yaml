@@ -1,0 +1,29 @@
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app: mongo
+#   name: mongo-nodeport-svc
+# spec:
+#   ports:
+#   - port: 27017
+#     protocol: TCP
+#     targetPort: 27017
+#     nodePort: 32000
+#   selector:
+#     app: mongo
+#   type: NodePort
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mongo-svc
+  name: mongo-svc
+spec:
+  ports:
+  - port: 27017
+    protocol: TCP
+    targetPort: 27017
+  selector:
+    app: mongo
+  type: ClusterIP
