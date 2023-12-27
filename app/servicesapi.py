@@ -5,6 +5,7 @@ from bson import ObjectId
 from datetime import datetime
 import os
 import time
+from prometheus_flask_exporter import PrometheusMetrics
 import logging
 
 parser = reqparse.RequestParser()
@@ -22,6 +23,7 @@ parser.add_argument('name', type=str, required=False, help='Filter by name', loc
 app = Flask(__name__)
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://mongo:27017/myDatabase")
 mongo = PyMongo(app)
+metrics = PrometheusMetrics(app)
 
 
 def is_db_ready():

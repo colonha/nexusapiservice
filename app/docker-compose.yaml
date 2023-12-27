@@ -32,3 +32,19 @@ services:
       - mongo
     environment:
       - MONGO_URI=mongodb://mongo:27017/mydatabase
+# prometheus
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ../infra/iac/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - web
+# grafana
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3101:3000"
+    depends_on:
+      - prometheus
