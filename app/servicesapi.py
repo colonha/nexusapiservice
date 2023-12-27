@@ -16,7 +16,6 @@ filter_parser.add_argument('name', type=str, required=False, help='Filter by ser
 
 
 app = Flask(__name__)
-# Configure the SQLAlchemy part of the app instance
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://mongo:27017/myDatabase")
 mongo = PyMongo(app)
 
@@ -96,7 +95,14 @@ class Version:
 
     @staticmethod
     def get_by_service_id(service_id):
-        return mongo.db.versions.find({'service_id': service_id})
+        try:
+            versions=mongo.db.versions.find({'service_id': ObjectId(service_id)})
+            if versions:
+                return [{k: str(v) if isinstance(v, ObjectId) else v for k, v in version.items()} for version in versions]
+        except Exception as e:
+            print("An error occurred:", e)
+            return None
+        
     
 
 @app.route('/')
