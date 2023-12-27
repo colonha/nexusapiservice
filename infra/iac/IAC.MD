@@ -30,3 +30,19 @@ Once we have all this set up we can run the following command to install ArgoCD 
 argocd-autopilot repo bootstrap
 ```
 
+## NexusApiService
+Inside the nexusapi folder we will find the files for Kubernetes deployent including the MongoDB, NexusApiService and the Service for the application. As well a secret is required with the following information:
+```console
+apiVersion: v1
+data:
+  password: <Base64 Username>
+  username: <Base64 Password>
+  mongodb_url: <Base64 Mongodd URI including user and password> #mongodb://user:password@mongo-svc:27017/mydatabase
+  kind: Secret
+metadata:
+  creationTimestamp: null
+  name: mongo-creds
+```
+
+
+

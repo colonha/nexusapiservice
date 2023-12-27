@@ -7,11 +7,15 @@ import os
 import time
 import logging
 
-pagination_data = reqparse.RequestParser()
-pagination_data.add_argument('page', type=int, required=True, help='Page number is required', location='args')
-pagination_data.add_argument('limit', type=int, required=True, help='Limit is required', location='args')
-filter_parser = reqparse.RequestParser()
-filter_parser.add_argument('name', type=str, required=False, help='Filter by service name', location='args')
+parser = reqparse.RequestParser()
+# Pagination parameters
+parser.add_argument('page', type=int, required=False, help='Page number of the results', location='args', default=None)
+parser.add_argument('limit', type=int, required=False, help='Number of results per page', location='args', default=None)
+
+# Filtering parameters
+parser.add_argument('name', type=str, required=False, help='Filter by name', location='args', default=None)
+# Add other filter parameters as needed...
+
 
 
 
@@ -41,19 +45,6 @@ def wait_for_db(max_retries=5, delay=3):
             retries += 1
     raise Exception("Database is not ready after maximum retries.")
 
-# services and versions documents structure
-# {
-#   "_id": "unique_service_id",
-#   "name": "Service Name",
-#   "description": "..."
-# }
-#
-# {
-#   "_id": "unique_version_id",
-#   "service_id": "unique_service_id",
-#   "version_number": "1.0",
-#   "additional_info": "..."
-# }
 
 # Service Class/Methods
 class Service:
@@ -64,13 +55,50 @@ class Service:
     def insert(self):
         self.creation_date = datetime.utcnow()
         return mongo.db.services.insert_one(self.__dict__).inserted_id
-
+    
     @staticmethod
-    def get_all():
+    def convert_service(service):
+        return {k: str(v) if isinstance(v, ObjectId) else v for k, v in service.items()}
+    
+    @classmethod
+    def get_all(cls):
         services = mongo.db.services.find()
         # Use list comprehension to convert each document
-        return [{k: str(v) if isinstance(v, ObjectId) else v for k, v in service.items()} for service in services]
+        return jsonify([cls.convert_service(service) for service in services])
+    @classmethod
+    def get_services(cls, args):
+        if args["name"]:
+            filtered_services = cls.apply_filters(args)
+            return jsonify({"services": [service for service in filtered_services]})
+        elif args["page"] and args["limit"]:
+            paginated_services = cls.apply_pagination(args)
+            return paginated_services
+        else:
+            return cls.get_all()
+    @classmethod
+    def apply_filters(cls, filters):
+        filter_dict = {}
+        for key, value in filters.items():
+            if value:
+                filter_dict[key] = value
+        services = mongo.db.services.find(filter_dict)
+        return [cls.convert_service(service) for service in services]
+    @classmethod
+    def apply_pagination(cls, pagination_data):
+        page = pagination_data.get('page', 1)
+        print("Page is:", page)
+        limit = pagination_data.get('limit', 5)
+        skip_amount = limit * (page - 1)
 
+        paginated_services = mongo.db.services.find().skip(skip_amount).limit(limit)
+        services_count = mongo.db.services.count_documents({})
+
+        return jsonify({
+            "total_number": services_count,
+            "page": page,
+            "showing": limit,
+            "services": [cls.convert_service(service) for service in paginated_services]
+        })
     @staticmethod
     def get_by_id(service_id):
         try:
@@ -109,7 +137,7 @@ class Version:
 def index():
     if not wait_for_db():
         return "Database is not ready", 503
-    return "Hello, World!"
+    return "Hello, welcome to API services!"
 
 @app.route('/api/service', methods=['POST'])
 def add_service():
@@ -139,41 +167,10 @@ def get_service(service_id):
     return jsonify({"service": service})
 
 @app.route('/api/services', methods=['GET'])
-def get_services():
-
-    args = filter_parser.parse_args()
-    filters = {}
-
-    if args['name']:
-        filters['name'] = args['name']
-        services = mongo.db.services.find(filters)
-        services_list = [{k: str(v) if isinstance(v, ObjectId) else v for k, v in service.items()} for service in services]
-        return jsonify({"services": [service for service in services_list]})
-
-    # Add other filters to the dictionary as needed
-
-    args = pagination_data.parse_args()
-    page = args['page']
-    #page = 2
-    print(page)
-    print("Hola PEPE")
-    limit = args['limit']
-    #limit = 3
-
-    services_count = mongo.db.services.count_documents({})
-    print(services_count)
-    services = mongo.db.services.find().skip(limit * (page - 1)).limit(limit)
-    services_list = [{k: str(v) if isinstance(v, ObjectId) else v for k, v in service.items()} for service in services]
-
-    return jsonify({
-        "total_number": services_count, 
-        "page": page, 
-        "showing": limit, 
-        "services": services_list
-    })
-    # services = Service.get_all()
-    # return jsonify({"services": [service for service in services]})
-
+def api_services():
+    args = parser.parse_args()
+    services = Service.get_services(args)
+    return services        
 
 if __name__ == "__main__":
     wait_for_db()

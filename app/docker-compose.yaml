@@ -2,30 +2,31 @@
 
 version: '3.1'
 services:
-  # web:
-  #   restart: on-failure
-  #   build: .
-  #   ports:
-  #     - "5000:5000"
-  #   depends_on:
-  #     - db
-  #   environment:
-  #     - FLASK_ENV=development
-  #     - SQLALCHEMY_DATABASE_URI=mysql+pymysql://root:password@db/mydatabase
-# please replace mysql with mongodb
-# add mongo db
+  web:
+    restart: on-failure
+    command: ["flask", "run", "--host=0.0.0.0"]
+    build: .
+    image: colonha/nexusapiservice
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+      - init-db
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/mydatabase
+
+# mongodb
   mongo:
     image: mongo:latest    
     ports:
       - "27017:27017"
     volumes:
       - ../../data/db:/data/db
+# init-db
   init-db:
     restart: on-failure
     command: ["python", "init_db.py"]
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     image: colonha/nexusapiservice
     depends_on:
       - mongo
