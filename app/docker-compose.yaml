@@ -46,5 +46,9 @@ services:
     image: grafana/grafana
     ports:
       - "3101:3000"
+    volumes:
+      - ../infra/iac/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ../infra/iac/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ../infra/iac/grafana/provisioning/dashboards/default.json:/var/lib/grafana/dashboards/default/default.json
     depends_on:
       - prometheus
