@@ -1,9 +1,15 @@
 from flask import Flask, jsonify, request
+from flask_restful import reqparse
 from flask_pymongo import PyMongo
 from bson import ObjectId
 from datetime import datetime
 import os
 import time
+import logging
+
+pagination_data = reqparse.RequestParser()
+pagination_data.add_argument('page', type=int, required=True, help='Page number is required', location='args')
+pagination_data.add_argument('limit', type=int, required=True, help='Limit is required', location='args')
 
 
 app = Flask(__name__)
@@ -118,15 +124,35 @@ def get_versions(service_id):
 
 
 @app.route('/api/service/<service_id>', methods=['GET'])
-def get_service(service_id):    
+def get_service(service_id):
     service = Service.get_by_id(service_id)
     print(service)
     return jsonify({"service": service})
 
 @app.route('/api/services', methods=['GET'])
 def get_services():
-    services = Service.get_all()
-    return jsonify({"services": [service for service in services]})
+    
+    args = pagination_data.parse_args()
+    page = args['page']
+    #page = 2
+    print(page)
+    print("Hola PEPE")
+    limit = args['limit']
+    #limit = 3
+
+    services_count = mongo.db.services.count_documents({})
+    print(services_count)
+    services = mongo.db.services.find().skip(limit * (page - 1)).limit(limit)
+    services_list = [{k: str(v) if isinstance(v, ObjectId) else v for k, v in service.items()} for service in services]
+
+    return jsonify({
+        "total_number": services_count, 
+        "page": page, 
+        "showing": limit, 
+        "services": services_list
+    })
+    # services = Service.get_all()
+    # return jsonify({"services": [service for service in services]})
 
 
 if __name__ == "__main__":
