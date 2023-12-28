@@ -36,6 +36,10 @@ Technologies Used
 *   **Docker:** Platform for developing, shipping, and running applications in containers.
     
 *   **Docker Compose:** Tool for defining and running multi-container Docker applications.
+
+*  **Prometheus:** Open-source monitoring and alerting toolkit.
+
+*  **Grafana:** Open-source analytics and monitoring solution.
     
 Data model
 ----------
@@ -87,9 +91,9 @@ Clone the repository
 ```console
 git clone git@github.com:colonha/nexus.git
 ```
-activate the virtual environment
+Go inside the webapp folder
 ```console
-source venv/bin/activate
+cd nexusapiservice/webapp
 ```
 Docker compose
 ```console
