@@ -9,7 +9,7 @@ This is my implementation of the Services API project. It is a RESTful API that 
 Features
 --------
 
-List the key features of the API, such as:
+Key features of the API include:
 
 *   Retrieving a list of services from the database.
     *  with options for filtering and pagination.
@@ -91,21 +91,16 @@ activate the virtual environment
 ```console
 source venv/bin/activate
 ```
-export the environment variable for the mongo db connection
-```console
-export MONGODB_URL=mongodb://user:password@mongo-svc:27017/mydatabase
-```
 Docker compose
 ```console
 docker compose up -d
 ```
-
     
 
 API Endpoints
 -------------
 
-Document the available API endpoints with their methods, path, request parameters, and a brief description of what they do. For example:
+The available API endpoints with their methods, path, request parameters, and description are listed below:
 
 *   **GET /api/services**: Retrieves a list of services.
     *  **GET /api/services?name=service_name**: Retrieves a list of services filtered by name.
@@ -119,10 +114,16 @@ Document the available API endpoints with their methods, path, request parameter
 
 *  **POST /api/version**: Creates a new version for a service.
 
-Testing
+Applications Endpoints
 -------
+NexusApiService
+http://localhost:5000/
+Prometheus
+http://localhost:9090/
+Grafana
+http://localhost:3101/
 
-WIP
+
 
 Observability
 -------------
@@ -130,3 +131,12 @@ Observability
 Added a layer of observability to the API using Prometheus and Grafana. The metrics are collected using the Prometheus Python client library and exposed on the /metrics endpoint. The metrics are then scraped by Prometheus and visualized in Grafana.
 
 As well added Automation in the docker-compose to install create the prometheus and grafana containers and install the dashboards and datasources.
+
+IaC Documentation
+-------------
+see documentation [here](infra/iac/IAC.MD)
+
+
+Testing
+-------
+To-Do

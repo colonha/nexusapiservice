@@ -21,7 +21,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ../../data/db:/data/db
+      - ../../data:/data
 # init-db
   init-db:
     restart: on-failure
