@@ -12,11 +12,11 @@ Features
 List the key features of the API, such as:
 
 *   Retrieving a list of services from the database.
-    *  WIP - with options for filtering, sorting, and pagination.
+    *  with options for filtering and pagination.
     
 *   Fetching details of a specific service, including available versions.
     
-*   WIP - Observability features for monitoring the service.
+*   Observability features for monitoring the service.
 
 Technologies Used
 -----------------
@@ -91,7 +91,10 @@ activate the virtual environment
 ```console
 source venv/bin/activate
 ```
-
+export the environment variable for the mongo db connection
+```console
+export MONGODB_URL=mongodb://user:password@mongo-svc:27017/mydatabase
+```
 Docker compose
 ```console
 docker compose up -d
@@ -105,11 +108,16 @@ API Endpoints
 Document the available API endpoints with their methods, path, request parameters, and a brief description of what they do. For example:
 
 *   **GET /api/services**: Retrieves a list of services.
+    *  **GET /api/services?name=service_name**: Retrieves a list of services filtered by name.
+    *  **GET /api/services?page=number&limit=number**: Retrieves a list of services paginated.
     
 *   **GET /api/services/:id**: Fetches details of a specific service.
-    
 
-    
+*  **GET /api/services/:id/versions**: Fetches details of a specific service, including available versions.
+
+*  **POST /api/service**: Creates a new service.
+
+*  **POST /api/version**: Creates a new version for a service.
 
 Testing
 -------
@@ -119,4 +127,6 @@ WIP
 Observability
 -------------
 
-WIP
+Added a layer of observability to the API using Prometheus and Grafana. The metrics are collected using the Prometheus Python client library and exposed on the /metrics endpoint. The metrics are then scraped by Prometheus and visualized in Grafana.
+
+As well added Automation in the docker-compose to install create the prometheus and grafana containers and install the dashboards and datasources.
